@@ -1,5 +1,6 @@
 import 'package:classroom/views/teacher_main_screen/create_assignment.dart';
 import 'package:classroom/views/teacher_main_screen/create_quiz.dart';
+import 'package:classroom/views/teacher_main_screen/take_attendance.dart';
 import 'package:classroom/widgets/appBar.dart';
 import 'package:classroom/widgets/homeScreenBox.dart';
 
@@ -28,7 +29,7 @@ class TeacherMainScreen extends StatelessWidget {
                 children: [
                   homeScreenBox(context, "Notice", CreateQuiz(), 150, 150, 25),
                   homeScreenBox(
-                      context, "Attendence", CreateAssignments(), 150, 150, 25)
+                      context, "Attendence", Attendance(), 150, 150, 25)
                 ],
               ),
             ],

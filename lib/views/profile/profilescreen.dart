@@ -42,7 +42,6 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     return Container(
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-
         child: StreamBuilder<DocumentSnapshot>(
             stream: provideDocumentFieldStream(widget.email),
             builder: (BuildContext context,
@@ -60,7 +59,6 @@ class _ProfileState extends State<Profile> {
               } else {
                 return null;
               }
-
             }));
   }
 }
@@ -196,4 +194,3 @@ class ProfileScreen extends StatelessWidget {
     ));
   }
 }
-

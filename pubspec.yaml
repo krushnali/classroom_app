@@ -33,6 +33,10 @@ dependencies:
   file_picker: ^1.13.0+1
   firebase_storage: ^4.0.1
   firebase_database: ^4.1.1
+  firebase_analytics: ^5.0.6
+  http: ^0.12.2
+  flutter_full_pdf_viewer: ^1.0.6
+  url_launcher: ^5.7.8
 
 
 

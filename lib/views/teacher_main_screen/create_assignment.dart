@@ -1,13 +1,14 @@
-import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
-
 import 'package:classroom/helper/constant.dart';
+import 'package:classroom/services/database.dart';
+import 'package:classroom/views/assignments/assignments.dart';
+import 'package:classroom/views/assignments/create_questions.dart';
+
 import 'package:classroom/widgets/appBar.dart';
-import 'package:file_picker/file_picker.dart';
+
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:flutter/material.dart';
+import 'package:random_string/random_string.dart';
 
 class CreateAssignments extends StatefulWidget {
   @override
@@ -15,47 +16,26 @@ class CreateAssignments extends StatefulWidget {
 }
 
 class _CreateAssignmentsState extends State<CreateAssignments> {
-  String teacheremail, branch, semister, div, about, title;
+  String teacheremail, branch, semister, div, about, title, subject, assignId;
   DateTime pickeddate;
   final mainReference = FirebaseDatabase.instance.reference().child('Database');
+  DatabaseService databaseService = new DatabaseService();
 
-  Future getPDFandUpload() async {
-    var rng = new Random();
-    String randomName = "";
-    for (var i = 0; i < 20; i++) {
-      print(rng.nextInt(100));
-      randomName = rng.nextInt(100).toString();
-    }
-    File file = await FilePicker.getFile(type: FileType.custom);
-    if (file == null) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => CreateAssignments()));
-    }
-    String fileName = '${randomName}.pdf';
-    savePdf(file.readAsBytesSync(), fileName);
-  }
-
-  savePdf(List<int> asset, String name) async {
-    StorageReference reference = FirebaseStorage.instance.ref().child(name);
-    StorageUploadTask uploadTask = reference.putData(asset);
-    String url = await (await uploadTask.onComplete).ref.getDownloadURL();
-    documentFileUpload(url);
-  }
-
-  void documentFileUpload(String str) {
-    var data = {
-      "PDF": str,
-      "FileName": "My New File",
+  Future storeAssignmentDetail() async {
+    assignId = randomAlphaNumeric(16);
+    Map<String, String> assignmentMap = {
+      "assignmentTitle": title,
+      "assignmentDescr": about,
+      "assignmentSubject": "DBMS",
+      "assignmentId": assignId,
+      "dueDate": pickeddate.toString(),
+      "forBranch": "Computer",
+      "forSem": semister,
+      "forDiv": div
     };
-    mainReference.child(createCryptoRandomString()).set(data).then((v) {
-      print("Store Successfully");
-    });
-  }
-
-  String createCryptoRandomString([int length = 32]) {
-    final Random _random = Random.secure();
-    var values = List<int>.generate(length, (i) => _random.nextInt(256));
-    return base64Url.encode(values);
+    databaseService.addAssignmentData(assignmentMap, assignId);
+    databaseService.addAssignmentDataInBranch(
+        assignmentMap, assignId, "Computer Engineering", semister, div);
   }
 
   @override
@@ -216,7 +196,7 @@ class _CreateAssignmentsState extends State<CreateAssignments> {
                             vertical: 15, horizontal: 40),
                         alignment: Alignment.center,
                         child: Text(
-                          "Upload PDF",
+                          "Set Questions",
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
@@ -225,7 +205,12 @@ class _CreateAssignmentsState extends State<CreateAssignments> {
                             borderRadius: BorderRadius.circular(20)),
                       ),
                       onTap: () {
-                        getPDFandUpload();
+                        storeAssignmentDetail();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    CreateAssignmentQuestions()));
                       },
                     )
                   ],
@@ -238,8 +223,8 @@ class _CreateAssignmentsState extends State<CreateAssignments> {
     DateTime date = await showDatePicker(
         context: context,
         initialDate: pickeddate,
-        firstDate: DateTime(DateTime.now().year - 50),
-        lastDate: DateTime.now());
+        firstDate: DateTime.now(),
+        lastDate: DateTime(DateTime.now().year + 50));
 
     if (date != null) {
       setState(() {
